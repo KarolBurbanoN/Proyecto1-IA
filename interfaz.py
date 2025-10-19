@@ -8,79 +8,86 @@ ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("green")
 
 CELDA = 40
+COLOR_BOTON = "#D7AA89"
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("Buscando el hongo mágico - Proyecto IA")
-        self.geometry("650x740")
+        self.geometry("1180x730")
         self.resizable(False, False)
 
         # --- Fondo ---
         fondo_img = Image.open("imagenes/Frame1.png")
-        fondo_img = fondo_img.resize((650, 740))
+        fondo_img = fondo_img.resize((1180, 730))
         self.fondo = ImageTk.PhotoImage(fondo_img)
 
-        self.canvas_fondo = ctk.CTkCanvas(self, width=650, height=740, highlightthickness=0)
+        self.canvas_fondo = ctk.CTkCanvas(self, width=1180, height=730, highlightthickness=0)
         self.canvas_fondo.pack(fill="both", expand=True)
         self.canvas_fondo.create_image(0, 0, image=self.fondo, anchor="nw")
 
         # --- Parámetros iniciales ---
-        self.filas = 9
-        self.columnas = 15
+        self.filas = 10
+        self.columnas = 16
         self.num_venenos = 25
         self.ambiente = Ambiente(self.filas, self.columnas, self.num_venenos)
 
         # --- Campo de dibujo (cuadro blanco) ---
         self.canvas_matriz = ctk.CTkCanvas(
             self,
-            width=600,
-            height=365,
+            width=640,
+            height=670,
             bg="white",
             highlightthickness=1,
             highlightbackground="green"
         )
-        self.canvas_matriz.place(x=25, y=365)
+        self.canvas_matriz.place(x=511, y=30)
 
         # --- Cargar imágenes para los elementos ---
         self.img_hormiga = ImageTk.PhotoImage(Image.open("imagenes/Hormiga.jpg").resize((CELDA, CELDA)))
         self.img_hongo = ImageTk.PhotoImage(Image.open("imagenes/Hongo.jpeg").resize((CELDA, CELDA)))
         self.img_veneno = ImageTk.PhotoImage(Image.open("imagenes/cesped.jpeg").resize((CELDA, CELDA)))
+        self.img_camino = ImageTk.PhotoImage(Image.open("imagenes/camino.png").resize((CELDA, CELDA)))
 
         # --- Entradas ---
-        self.entry_filas = ctk.CTkEntry(self, width=55, height=20)
+        self.entry_filas = ctk.CTkEntry(self, width=55, height=20, border_color="green")
         self.entry_filas.insert(0, str(self.filas))
-        self.entry_filas.place(x=205, y=221)
+        self.entry_filas.place(x=263, y=213)
 
-        self.entry_columnas = ctk.CTkEntry(self, width=55, height=20)
+        self.entry_columnas = ctk.CTkEntry(self, width=55, height=20, border_color="green")
         self.entry_columnas.insert(0, str(self.columnas))
-        self.entry_columnas.place(x=205, y=251)
+        self.entry_columnas.place(x=263, y=243)
 
-        self.entry_venenos = ctk.CTkEntry(self, width=55, height=20)
+        self.entry_venenos = ctk.CTkEntry(self, width=55, height=20, border_color="green")
         self.entry_venenos.insert(0, str(self.num_venenos))
-        self.entry_venenos.place(x=205, y=283)
+        self.entry_venenos.place(x=263, y=273)
 
         # --- Botones ---
-        self.btn_nuevo = ctk.CTkButton(self, text="Nuevo Tablero", width=120, height=30, command=self.nuevo_tablero)
-        self.btn_nuevo.place(x=140, y=318)
+        self.btn_nuevo = ctk.CTkButton(self, text="Nuevo Tablero", width=120, height=30, fg_color=COLOR_BOTON, text_color="black", hover_color="#A76D43",command=self.nuevo_tablero)
+        self.btn_nuevo.place(x=198, y=310)
 
-        self.btn_beam = ctk.CTkButton(self, text="Beam Search", width=120, height=30, command=self.ejecutar_beam)
-        self.btn_beam.place(x=289, y=318)
+        self.btn_beam = ctk.CTkButton(self, text="Beam Search", width=120, height=30, fg_color=COLOR_BOTON, text_color="black", hover_color="#A76D43",command=self.ejecutar_beam)
+        self.btn_beam.place(x=198, y=599)
 
-        self.btn_dwastar = ctk.CTkButton(self, text="Dynamic Weighted A*", width=150, height=30, command=self.ejecutar_dwastar)
-        self.btn_dwastar.place(x=429, y=318)
+        self.btn_dwastar = ctk.CTkButton(self, text="Dynamic Weighted A*", width=150, height=30, fg_color=COLOR_BOTON, text_color="black", hover_color="#A76D43", command=self.ejecutar_dwastar)
+        self.btn_dwastar.place(x=184, y=646)
 
         # --- Dibuja tablero inicial ---
         self.dibujar_tablero()
 
     def dibujar_tablero(self):
         self.canvas_matriz.delete("all")
+
         for i in range(self.filas):
             for j in range(self.columnas):
                 valor = self.ambiente.matriz[i][j]
                 x, y = j * CELDA, i * CELDA
-                self.canvas_matriz.create_rectangle(x, y, x + CELDA, y + CELDA, outline="#ccc", fill="#fff")
+
+                # Dibuja fondo de césped (camino)
+                self.canvas_matriz.create_image(x, y, image=self.img_camino, anchor="nw")
+
+                # Luego dibuja encima el elemento correspondiente
                 if valor == "A":
                     self.canvas_matriz.create_image(x, y, image=self.img_hormiga, anchor="nw")
                 elif valor == "H":
