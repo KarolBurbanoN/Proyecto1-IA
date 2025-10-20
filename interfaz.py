@@ -44,9 +44,18 @@ class App(ctk.CTk):
         )
         self.canvas_matriz.place(x=511, y=30)
 
-        # --- Cargar imágenes para los elementos ---
-        self.img_hormiga = ImageTk.PhotoImage(Image.open("imagenes/Hormiga.jpg").resize((CELDA, CELDA)))
-        self.img_hongo = ImageTk.PhotoImage(Image.open("imagenes/Hongo.jpeg").resize((CELDA, CELDA)))
+        # --- Sprites de la hormiga ---
+        self.hormiga_sprites = [
+            ImageTk.PhotoImage(Image.open("imagenes/3.png").resize((CELDA, CELDA))),   # Estática
+            ImageTk.PhotoImage(Image.open("imagenes/4.png").resize((CELDA, CELDA))),   # Mov1
+            ImageTk.PhotoImage(Image.open("imagenes/6.png").resize((CELDA, CELDA))),   # Mov1 parpadeo
+            ImageTk.PhotoImage(Image.open("imagenes/5.png").resize((CELDA, CELDA))),   # Mov2
+            ImageTk.PhotoImage(Image.open("imagenes/7.png").resize((CELDA, CELDA))),   # Mov2 parpadeo
+            ImageTk.PhotoImage(Image.open("imagenes/HongoHormiga.png").resize((CELDA, CELDA)))  # Final con hongo
+        ]
+
+        # --- Otras imágenes ---
+        self.img_hongo = ImageTk.PhotoImage(Image.open("imagenes/Hongo2.png").resize((CELDA, CELDA)))
         self.img_veneno = ImageTk.PhotoImage(Image.open("imagenes/cesped.jpeg").resize((CELDA, CELDA)))
         self.img_camino = ImageTk.PhotoImage(Image.open("imagenes/camino.png").resize((CELDA, CELDA)))
 
@@ -96,11 +105,23 @@ class App(ctk.CTk):
                     self.canvas_matriz.create_image(x, y, image=self.img_veneno, anchor="nw")
 
     def animar_camino(self, camino):
-        for fila, col in camino:
-            self.dibujar_tablero()
-            self.canvas_matriz.create_image(col * CELDA, fila * CELDA, image=self.img_hormiga, anchor="nw")
-            self.update()
-            time.sleep(0.2)
+            # Secuencia cíclica de movimiento: mov1 → mov1 parpadeo → mov2 → mov2 parpadeo
+            secuencia = [1, 2, 3, 4]
+            indice = 0
+
+            for i, (fila, col) in enumerate(camino):
+                self.dibujar_tablero()
+
+                # Si es la última posición, muestra la hormiga con el hongo
+                if i == len(camino) - 1:
+                    sprite = self.hormiga_sprites[5]
+                else:
+                    sprite = self.hormiga_sprites[secuencia[indice]]
+                    indice = (indice + 1) % len(secuencia)
+
+                self.canvas_matriz.create_image(col * CELDA, fila * CELDA, image=sprite, anchor="nw")
+                self.update()
+                time.sleep(0.25)  # velocidad de la animación
 
     def nuevo_tablero(self):
         try:
