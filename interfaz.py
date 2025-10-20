@@ -71,6 +71,19 @@ class App(ctk.CTk):
         self.entry_venenos = ctk.CTkEntry(self, width=55, height=20, border_color="green")
         self.entry_venenos.insert(0, str(self.num_venenos))
         self.entry_venenos.place(x=263, y=273)
+        
+        # --- Campos de información ---
+        self.label_inicio = ctk.CTkLabel(self, text="", text_color="black", bg_color="white")
+        self.label_inicio.place(x=300, y=390)
+
+        self.label_meta = ctk.CTkLabel(self, text="", text_color="black", bg_color="white")
+        self.label_meta.place(x=250, y=410)
+
+        self.label_tiempo = ctk.CTkLabel(self, text="", text_color="black", bg_color="white")
+        self.label_tiempo.place(x=250, y=440)
+
+        self.text_solucion = ctk.CTkTextbox(self, width=190, height=92, border_color="black", border_width=1)
+        self.text_solucion.place(x=164, y=496)
 
         # --- Botones ---
         self.btn_nuevo = ctk.CTkButton(self, text="Nuevo Tablero", width=120, height=30, fg_color=COLOR_BOTON, text_color="black", hover_color="#A76D43",command=self.nuevo_tablero)
@@ -98,11 +111,12 @@ class App(ctk.CTk):
 
                 # Luego dibuja encima el elemento correspondiente
                 if valor == "A":
-                    self.canvas_matriz.create_image(x, y, image=self.img_hormiga, anchor="nw")
+                    self.canvas_matriz.create_image(x, y, image=self.hormiga_sprites[0], anchor="nw")
                 elif valor == "H":
                     self.canvas_matriz.create_image(x, y, image=self.img_hongo, anchor="nw")
                 elif valor == "V":
                     self.canvas_matriz.create_image(x, y, image=self.img_veneno, anchor="nw")
+
 
     def animar_camino(self, camino):
             # Secuencia cíclica de movimiento: mov1 → mov1 parpadeo → mov2 → mov2 parpadeo
@@ -122,6 +136,23 @@ class App(ctk.CTk):
                 self.canvas_matriz.create_image(col * CELDA, fila * CELDA, image=sprite, anchor="nw")
                 self.update()
                 time.sleep(0.25)  # velocidad de la animación
+                
+    def actualizar_info(self, metodo, camino, tiempo):
+        """Actualiza los campos de información (inicio, meta, tiempo, solución)."""
+        inicio = self.ambiente.pos_hormiga
+        meta = self.ambiente.pos_hongo
+
+        self.label_inicio.configure(text=f"{inicio}")
+        self.label_meta.configure(text=f"{meta}")
+        self.label_tiempo.configure(text=f"{tiempo*1000:.3f} ms")
+
+        self.text_solucion.configure(state="normal")
+        self.text_solucion.delete("1.0", "end")
+        if camino:
+            self.text_solucion.insert("end", f"Algoritmo: {metodo}\nLongitud del camino: {len(camino)} pasos\n\nCamino:\n{camino}")
+        else:
+            self.text_solucion.insert("end", f"Algoritmo: {metodo}\n❌ No se encontró camino.")
+        self.text_solucion.configure(state="disabled")
 
     def nuevo_tablero(self):
         try:
@@ -137,14 +168,26 @@ class App(ctk.CTk):
             self.mostrar_mensaje("⚠️ Tamaño o cantidad inválida.")
 
     def ejecutar_beam(self):
+        import time
+        inicio_t = time.perf_counter()  # más preciso para medir tiempos cortos
         camino = beam_search(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, beta=4)
+        tiempo = time.perf_counter() - inicio_t  # calcula la diferencia exacta
+
+        self.actualizar_info("Beam Search", camino, tiempo)
+
         if camino:
             self.animar_camino(camino)
         else:
             self.mostrar_mensaje("❌ No se encontró camino con Beam Search.")
-
+            
     def ejecutar_dwastar(self):
+        import time
+        inicio_t = time.perf_counter()
         camino = dynamic_weighted_a_star(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, epsilon=2.0)
+        tiempo = time.perf_counter() - inicio_t
+
+        self.actualizar_info("Dynamic Weighted A*", camino, tiempo)
+
         if camino:
             self.animar_camino(camino)
         else:
