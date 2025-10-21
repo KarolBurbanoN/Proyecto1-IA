@@ -31,9 +31,12 @@ def beam_search(matriz, inicio, meta, beta=3):
     - meta: posición del hongo
     - beta: ancho del haz (beam width)
     """
+    # [f, posición]
+    # 'f' es el costo estimado total: f = g + h
     # Cola de prioridad con tuplas (heurística, posición)
     frontera = [(heuristica(inicio, meta), inicio)]
     padres = {}
+    g_costos = {inicio: 0}#Almacena el costo real (g) desde el inicio
     visitados = set()
 
     while frontera:
@@ -48,12 +51,21 @@ def beam_search(matriz, inicio, meta, beta=3):
             visitados.add(actual)
 
             for vecino in vecinos(actual, matriz):
-                if vecino not in visitados:
-                    padres[vecino] = actual
-                    h = heuristica(vecino, meta)
-                    heapq.heappush(nuevos, (h, vecino))
+                nuevo_g = g_costos[actual] + 1 # cada movimiento cuesta 1
 
-        frontera = nuevos
+                # Usamos la lógica de A*: si es un camino mejor, actualizamos
+                if vecino not in g_costos or nuevo_g < g_costos[vecino]:
+                    
+                    g_costos[vecino] = nuevo_g
+                    
+                    h = heuristica(vecino, meta)
+                    f = nuevo_g + h  # Usamos f = g + h para la evaluación
+                    padres[vecino] = actual
+                    # Usamos heapq para mantener ordenados los nodos de la nueva frontera
+                    heapq.heappush(nuevos, (f, vecino))
+        
+        
+        frontera = sorted(nuevos, key=lambda x: x[0])[:beta]
 
     return None  # No se encontró camino
 

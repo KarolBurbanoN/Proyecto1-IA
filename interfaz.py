@@ -176,7 +176,7 @@ class App(ctk.CTk):
     def ejecutar_beam(self):
         import time
         inicio_t = time.perf_counter()  # más preciso para medir tiempos cortos
-        camino = beam_search(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, beta=4)
+        camino = beam_search(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, beta=10)
         tiempo = time.perf_counter() - inicio_t  # calcula la diferencia exacta
 
         self.actualizar_info("Beam Search", camino, tiempo)
