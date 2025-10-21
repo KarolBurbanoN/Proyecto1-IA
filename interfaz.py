@@ -72,6 +72,24 @@ class App(ctk.CTk):
         self.entry_venenos = ctk.CTkEntry(self, width=55, height=20, border_color="green")
         self.entry_venenos.insert(0, str(self.num_venenos))
         self.entry_venenos.place(x=263, y=273)
+
+        """
+        # --- Entrada para beta (Beam Width) ---
+        label_beta = ctk.CTkLabel(self, text="β:", text_color="black", bg_color="LightGreen")
+        label_beta.place(x=180, y=690)
+        self.entry_beta = ctk.CTkEntry(self, width=55, height=20, border_color="green")
+        self.entry_beta.insert(0, "4")  # valor por defecto
+        self.entry_beta.place(x=198, y=692)
+        
+        # --- Entrada para epsilon (Dynamic Weighted A*) ---
+        label_epsilon = ctk.CTkLabel(self, text="ε:", text_color="black", bg_color="LightGreen")
+        label_epsilon.place(x=270, y=686)
+        self.entry_epsilon = ctk.CTkEntry(self, width=55, height=20, border_color="green")
+        self.entry_epsilon.insert(0, "2.0")
+        self.entry_epsilon.place(x=290, y=690)
+
+        """
+
         
         # --- Campos de información ---
         self.label_inicio = ctk.CTkLabel(self, text="", text_color="black", bg_color="white")
@@ -190,6 +208,13 @@ class App(ctk.CTk):
 
     def ejecutar_beam(self):
         import time
+        """
+        try:
+            beta = int(self.entry_beta.get())
+        except ValueError:
+            beta = 10  # valor por defecto si no se ingresa correctamente
+        """
+
         inicio_t = time.perf_counter()  # más preciso para medir tiempos cortos
         camino = beam_search(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, beta=10)
         tiempo = time.perf_counter() - inicio_t  # calcula la diferencia exacta
@@ -203,6 +228,12 @@ class App(ctk.CTk):
             
     def ejecutar_dwastar(self):
         import time
+        """
+        try:
+            epsilon = float(self.entry_epsilon.get())
+        except ValueError:
+            epsilon = 2.0  # valor por defecto si no se ingresa correctamente
+        """
         inicio_t = time.perf_counter()
         camino = dynamic_weighted_a_star(self.ambiente.matriz, self.ambiente.pos_hormiga, self.ambiente.pos_hongo, epsilon=2.0)
         tiempo = time.perf_counter() - inicio_t
