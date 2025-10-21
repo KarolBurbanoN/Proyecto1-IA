@@ -1,3 +1,4 @@
+import random
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import time
@@ -98,7 +99,7 @@ class App(ctk.CTk):
         # --- Dibuja tablero inicial ---
         self.dibujar_tablero()
 
-    def dibujar_tablero(self):
+    def dibujar_tablero(self, dibujar_hormiga=True):
         self.canvas_matriz.delete("all")
 
         for i in range(self.filas):
@@ -106,11 +107,11 @@ class App(ctk.CTk):
                 valor = self.ambiente.matriz[i][j]
                 x, y = j * CELDA, i * CELDA
 
-                # Dibuja fondo de césped (camino)
+                # Fondo de césped
                 self.canvas_matriz.create_image(x, y, image=self.img_camino, anchor="nw")
 
-                # Luego dibuja encima el elemento correspondiente
-                if valor == "A":
+                # Dibuja los elementos
+                if valor == "A" and dibujar_hormiga:
                     self.canvas_matriz.create_image(x, y, image=self.hormiga_sprites[0], anchor="nw")
                 elif valor == "H":
                     self.canvas_matriz.create_image(x, y, image=self.img_hongo, anchor="nw")
@@ -119,23 +120,29 @@ class App(ctk.CTk):
 
 
     def animar_camino(self, camino):
-            # Secuencia cíclica de movimiento: mov1 → mov1 parpadeo → mov2 → mov2 parpadeo
-            secuencia = [1, 2, 3, 4]
-            indice = 0
+        paso_sin_parpadeo = 0  # contador de movimientos normales
 
-            for i, (fila, col) in enumerate(camino):
-                self.dibujar_tablero()
+        for i, (fila, col) in enumerate(camino):
+            # Redibuja tablero sin la hormiga inicial estática
+            self.dibujar_tablero(dibujar_hormiga=False)
 
-                # Si es la última posición, muestra la hormiga con el hongo
-                if i == len(camino) - 1:
-                    sprite = self.hormiga_sprites[5]
+            # Última posición → mostrar hormiga sobre el hongo
+            if i == len(camino) - 1:
+                sprite = self.hormiga_sprites[5]
+            else:
+                if paso_sin_parpadeo < 2:
+                    # Mostrar movimientos normales alternando entre sprite 1 y 3
+                    sprite = self.hormiga_sprites[1] if paso_sin_parpadeo % 2 == 0 else self.hormiga_sprites[3]
+                    paso_sin_parpadeo += 1
                 else:
-                    sprite = self.hormiga_sprites[secuencia[indice]]
-                    indice = (indice + 1) % len(secuencia)
+                    # Cada tercer movimiento: parpadeo aleatorio entre sprite 2 o 4
+                    sprite = random.choice([self.hormiga_sprites[2], self.hormiga_sprites[4]])
+                    paso_sin_parpadeo = 0  # reinicia el contador
 
-                self.canvas_matriz.create_image(col * CELDA, fila * CELDA, image=sprite, anchor="nw")
-                self.update()
-                time.sleep(0.25)  # velocidad de la animación
+            self.canvas_matriz.create_image(col * CELDA, fila * CELDA, image=sprite, anchor="nw")
+            self.update()
+            time.sleep(0.25)
+
                 
     def actualizar_info(self, metodo, camino, tiempo):
         """Actualiza los campos de información (inicio, meta, tiempo, solución)."""
