@@ -152,20 +152,28 @@ class App(ctk.CTk):
                 
     def actualizar_info(self, metodo, camino, tiempo):
         """Actualiza los campos de información (inicio, meta, tiempo, solución)."""
-        inicio = self.ambiente.pos_hormiga
-        meta = self.ambiente.pos_hongo
+        # Invertir coordenadas (fila, col) -> (col, fila)
+        inicio = tuple(reversed(self.ambiente.pos_hormiga))
+        meta = tuple(reversed(self.ambiente.pos_hongo))
 
         self.label_inicio.configure(text=f"{inicio}")
         self.label_meta.configure(text=f"{meta}")
         self.label_tiempo.configure(text=f"{tiempo*1000:.3f} ms")
 
+        # Invertir coordenadas del camino también
+        camino_invertido = [tuple(reversed(p)) for p in camino] if camino else None
+
         self.text_solucion.configure(state="normal")
         self.text_solucion.delete("1.0", "end")
-        if camino:
-            self.text_solucion.insert("end", f"Algoritmo: {metodo}\nLongitud del camino: {len(camino)} pasos\n\nCamino:\n{camino}")
+        if camino_invertido:
+            self.text_solucion.insert(
+                "end",
+                f"Algoritmo: {metodo}\nLongitud del camino: {len(camino_invertido)} pasos\n\nCamino:\n{camino_invertido}"
+            )
         else:
             self.text_solucion.insert("end", f"Algoritmo: {metodo}\n❌ No se encontró camino.")
         self.text_solucion.configure(state="disabled")
+
 
     def nuevo_tablero(self):
         try:
