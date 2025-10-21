@@ -56,7 +56,7 @@ class App(ctk.CTk):
 
         # --- Otras imágenes ---
         self.img_hongo = ImageTk.PhotoImage(Image.open("imagenes/Hongo2.png").resize((CELDA, CELDA)))
-        self.img_veneno = ImageTk.PhotoImage(Image.open("imagenes/cesped.jpeg").resize((CELDA, CELDA)))
+        self.img_veneno = ImageTk.PhotoImage(Image.open("imagenes/veneno.jpg").resize((CELDA, CELDA)))
         self.img_camino = ImageTk.PhotoImage(Image.open("imagenes/camino.png").resize((CELDA, CELDA)))
 
         # --- Entradas ---
@@ -100,6 +100,12 @@ class App(ctk.CTk):
 
     def dibujar_tablero(self):
         self.canvas_matriz.delete("all")
+        
+        #-- Ajusta el tamaño del canvas según filas y columnas ---
+        #ancho = self.columnas * CELDA
+        #alto = self.filas * CELDA
+        #self.canvas_matriz.config(width=ancho, height=alto)
+
 
         for i in range(self.filas):
             for j in range(self.columnas):
